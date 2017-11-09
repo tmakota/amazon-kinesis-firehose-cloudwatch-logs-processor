@@ -1,72 +1,90 @@
+/*
+For processing data sent to Firehose by Cloudwatch Logs subscription filters.
+
+Cloudwatch Logs sends to Firehose records that look like this:
+
+{
+  "messageType": "DATA_MESSAGE",
+  "owner": "123456789012",
+  "logGroup": "log_group_name",
+  "logStream": "log_stream_name",
+  "subscriptionFilters": [
+    "subscription_filter_name"
+  ],
+  "logEvents": [
+    {
+      "id": "01234567890123456789012345678901234567890123456789012345",
+      "timestamp": 1510109208016,
+      "message": "log message 1"
+    },
+    {
+      "id": "01234567890123456789012345678901234567890123456789012345",
+      "timestamp": 1510109208017,
+      "message": "log message 2"
+    }
+    ...
+  ]
+}
+
+The data is additionally compressed with GZIP.
+
+The code below will:
+
+1) Gunzip the data
+2) Parse the json
+3) Set the result to ProcessingFailed for any record whose messageType is not DATA_MESSAGE, thus redirecting them to the
+   processing error output. Such records do not contain any log events. You can modify the code to set the result to
+   Dropped instead to get rid of these records completely.
+4) For records whose messageType is DATA_MESSAGE, extract the individual log events from the logEvents field, and pass
+   each one to the transformLogEvent method. You can modify the transformLogEvent method to perform custom
+   transformations on the log events.
+5) Concatenate the result from (4) together and set the result as the data of the record returned to Firehose. Note that
+   this step will not add any delimiters. Delimiters should be appended by the logic within the transformLogEvent
+   method.
+*/
+
 'use strict';
+
 const zlib = require('zlib');
 
-console.log('Loading function');
-
-function unzippData(record) {
-    return new Promise((resolve, reject) => {
-        // decode data from the buffer , its BASE64 encoded
-        const decodedData = (Buffer.from(record.data, 'base64'));
-        console.log("promise:: recordId: |", record.recordId,"|  'data' attrib: ", decodedData);
-        
-        zlib.gunzip(decodedData, (err, result) => {
-            console.log("promise::gunzip started:: ");
-            if (err) {
-                console.log("promise::gunzip error:: ", err);
-                reject(error);
-            } else {
-                // at this point we have VPC flow log data events
-                const parsed = JSON.parse(result.toString('ascii'));
-                console.log("promise::gunzip Data:: ", parsed);
-                
-                const logEvents = [];
-                if (parsed.logEvents) {
-                    parsed.logEvents.forEach((item) => {
-                        //customize below to match format you want to see in Splunk
-                        let logEvent = {
-                            'logGroup': parsed.logGroup,
-                            'logStream': parsed.logStream,
-                            'id': item.id,
-                            'timestamp': item.timestamp, 
-                            'data': item.message  // << this is actual VPC Log Data
-                        }
-                        logEvents.push(logEvent);
-                    });
-                }
-                console.log(`promise::Decoded Events: ` , JSON.stringify(logEvents));
-                console.log(`promise::VPC Log records ${logEvents.length}.`);
-                
-                // set record result as ok
-                record.result = "Ok";
-                
-                resolve(logEvents);
-            }
-        });
-  })
-} 
+/**
+ * logEvent has this format:
+ *
+ * {
+ *   "id": "01234567890123456789012345678901234567890123456789012345",
+ *   "timestamp": 1510109208016,
+ *   "message": "log message 1"
+ * }
+ *
+ * The default implementation below just extracts the message and appends a newline to it.
+ *
+ * The result must be returned in a Promise.
+ */
+function transformLogEvent(logEvent) {
+  return Promise.resolve(logEvent.message + '\n');
+}
 
 exports.handler = (event, context, callback) => {
-    // raw data will contain multiple Firehose recordId's
-    console.log('Raw Data in FH:', JSON.stringify(event.records));
-    
-    // Map input data to an Array of Promises
-    let promises = event.records.map(record => {
-      return unzippData(record)
-        .then(unzippedData => {
-          record.data = (Buffer.from(JSON.stringify(unzippedData), 'utf8')).toString('base64');
-          return record;
-        })
-    });
-
-    // Wait for all Promises to complete
-    Promise.all(promises)
-        .then(results => {
-            // Handle results
-            console.log(`Data back to Firehose: `,JSON.stringify(results));
-            callback(null, { records: results });
-    })
-  .catch(e => {
-    console.error(e);
-    callback(e);
-  })
-}    
+  Promise.all(event.records.map(r => {
+    const buffer = new Buffer(r.data, 'base64')
+    const decompressed = zlib.gunzipSync(buffer)
+    const data = JSON.parse(decompressed)
+    if (data.messageType != 'DATA_MESSAGE') {
+      return Promise.resolve({
+        'recordId': r['recordId'],
+        'result': 'ProcessingFailed'
+      })
+    } else {
+      const promises = data.logEvents.map(transformLogEvent)
+      return Promise.all(promises).then(transformed => {
+        const payload = transformed.reduce((a, v) => a + v, '')
+        const encoded = new Buffer(payload).toString('base64')
+        return {
+          'recordId': r['recordId'],
+          'result': 'Ok',
+          'data': encoded
+        }
+      })
+    }
+  })).then(recs => callback(null, { records: recs }))
+}
