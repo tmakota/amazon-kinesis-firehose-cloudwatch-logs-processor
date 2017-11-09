@@ -1,6 +1,6 @@
 const expect = require('chai').expect;
 const testEvent = require('./sampleEvent.json');
-const handler = require('../lib/index').handler;
+const handler = require('../index').handler;
 
 describe('kinesis-firehose-cloudwatch-logs-processor', () => {
     it('should produce the expected output', () => {
