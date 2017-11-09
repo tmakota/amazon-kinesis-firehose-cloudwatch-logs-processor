@@ -8,10 +8,10 @@
     "test": "mocha",
     "clean": "rm -f kinesis-firehose-cloudwatch-logs-processor.zip",
     "pretest": "npm run lint",
-    "build": "npm test && npm run clean && zip -j kinesis-firehose-cloudwatch-logs-processor.zip index.js template.yaml",
-    "deploy:cfn-package": "aws cloudformation package --template template.yaml --s3-bucket $npm_config_sam_s3_bucket_name --output-template-file template.output.yaml",
-    "deploy:cfn-deploy": "aws cloudformation deploy --template-file $(pwd)/template.output.yaml --stack-name $npm_config_parm_stack_name --capabilities CAPABILITY_IAM",
-    "deploy": "npm run build && npm run deploy:cfn-package && npm run deploy:cfn-deploy"
+    "build:zip": "npm test && npm run clean && zip -j kinesis-firehose-cloudwatch-logs-processor.zip index.js template.yaml",
+    "build:package": "aws cloudformation package --template template.yaml --s3-bucket $npm_config_sam_s3_bucket_name --output-template-file template.output.yaml",
+    "build:deploy": "aws cloudformation deploy --template-file $(pwd)/template.output.yaml --stack-name $npm_config_parm_stack_name --capabilities CAPABILITY_IAM",
+    "build": "npm test && npm run build:package && npm run build:deploy"
   },
   "keywords": [
     "splunk",
