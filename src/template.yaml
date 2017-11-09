@@ -1,0 +1,29 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: 'AWS::Serverless-2016-10-31'
+Description: >
+    An Amazon Kinesis Firehose stream processor that converts input records from VPC Flow Logs to raw ingestable format
+
+    This SAM template creates the Lambda function with its IAM execution role.Kinesis Stream must be in same region as the region where this stack is created.
+
+    Last Modified: 8 Nov , 2017
+    Authors:  Tarik Makota <tmak@amazon.com>, Kevin Deng <chaodeng@amazon.com>
+      
+Outputs:
+    FirehoseKinesisInlineProcessor:
+      Description: "Resulting Lambda Function ARN"
+      Value: !GetAtt FirehoseKinesisInlineProcessor.Arn
+
+Resources:
+    FirehoseKinesisInlineProcessor:
+      Type: 'AWS::Serverless::Function'
+      Properties:
+        Handler: node.handler
+        Runtime: nodejs6.10
+        CodeUri: ./kinesis-firehose-inline-transform.zip
+        Policies: AWSLambdaBasicExecutionRole
+        Description: An Amazon Kinesis Firehose stream processor that converts input records from VPC Flow Logs to raw ingestable format
+        MemorySize: 512
+        Timeout: 60
+        
+
+  

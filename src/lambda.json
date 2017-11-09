@@ -1,0 +1,32 @@
+{
+  "lambda": {
+    "FunctionName": "kinesis-firehose-inline-transform",
+    "Handler": "index.handler",
+    "Runtime": "nodejs6.10",
+    "Description": "An Amazon Kinesis Firehose stream processor that converts input records from VPC Flow Logs to raw ingestable format",
+    "MemorySize": 512,
+    "Timeout": 60
+  },
+  "triggers": {
+    "kinesis": [
+      {}
+    ]
+  },
+  "version": "0.1.0",
+  "license": "CC0-1.0",
+  "tags": [
+    "nodejs",
+    "splunk",
+    "kinesis",
+    "firehose"
+  ],
+  "authors": [
+    "Tarik Makota <tmak@amazon.com> (https://aws.amazon.com)",
+    "Kevin Deng <chaodeng@amazon.com> (https://aws.amazon.com)"
+  ],
+  "roleTemplates": [
+    "Kinesis",
+    "Firehose"
+  ]
+}
+

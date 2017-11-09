@@ -1,0 +1,2 @@
+sam_s3_bucket_name = fake-s3-bucket-name
+parm_stack_name = fakeStackName

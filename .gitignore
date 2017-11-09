@@ -1,0 +1,15 @@
+node_modules
+npm-debug.log
+.DS_Store
+# environment setting file 
+.npmrc
+
+# backup for local testing
+*.backup
+
+# Artifacts from build & test
+*.zip
+packaged-template.yaml
+template.output.yaml
+lib
+setEnv.sh
