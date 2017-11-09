@@ -4,7 +4,7 @@
   "description": "An Amazon Kinesis Firehose stream processor that extracts individual log events from records sent by Cloudwatch Logs subscription filters.",
   "main": "index.js",
   "scripts": {
-    "lint": "eslint -c .eslintrc --ignore-path .eslintignore lib test",
+    "lint": "eslint -c .eslintrc index.js test",
     "test": "mocha",
     "clean": "rm -f kinesis-firehose-cloudwatch-logs-processor.zip",
     "pretest": "npm run lint",
