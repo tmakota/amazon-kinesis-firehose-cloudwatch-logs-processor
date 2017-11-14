@@ -1,6 +1,6 @@
 # kinesis-firehose-cloudwatch-logs-processor
 
-For processing data sent to Firehose by Cloudwatch Logs subscription filters.
+This is AWS Serverless Application Model application for processing data sent to Amazon Kinesis Firehose by Cloudwatch Logs subscription filters.
 
 <!-- START doctoc generated TOC please keep comment here to allow auto update -->
 <!-- DON'T EDIT THIS SECTION, INSTEAD RE-RUN doctoc TO UPDATE -->
