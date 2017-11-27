@@ -17,8 +17,7 @@ Resources:
     Properties:
       Handler: index.handler
       Runtime: nodejs6.10
-      CodeUri: ./kinesis-firehose-cloudwatch-logs-processor.zip
-      Policies: AWSLambdaBasicExecutionRole
+      CodeUri: ./amazon-kinesis-firehose-cloudwatch-logs-processor.zip
       Description: An Amazon Kinesis Firehose stream processor that converts input records from VPC Flow Logs to raw ingestable format
       MemorySize: 256
       Timeout: 60
