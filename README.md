@@ -54,7 +54,7 @@ You can do this either using **npm** or **AWS CLI**
 
 Before you run this command please ensure that you have set correct values in your application .npmrc
 ```
-npm run build:template
+npm run build:package
 ```
 
 **Upload using AWS CLI**
@@ -94,7 +94,7 @@ For each serverless application, you can use the following npm tasks:
 | `npm run clean` | Remove zip deployment package |
 | `npm run test` (or `npm test`) | Run unit tests |
 | `npm run build:zip` | Create zip SAM deployment package with required .js files |
-| `npm run build:template` | Uploads SAM deployment package with required template files to AWS S3 Bucket|
+| `npm run build:package` | Uploads SAM deployment package with required template files to AWS S3 Bucket|
 | `npm run build:deploy` | Creates CloudFormation Stack and deploys SAM package from AWS S3 Bucket|
 | `npm run build` | Runs build:zip then build:template and then build:deploy|
 
