@@ -17,7 +17,9 @@
     "splunk",
     "lambda",
     "kinesis",
-    "firehose"
+    "firehose",
+    "unzipp",
+    "cloudwatch"
   ],
   "authors": [
     "Tarik Makota <tmak@amazon.com> (https://aws.amazon.com)",

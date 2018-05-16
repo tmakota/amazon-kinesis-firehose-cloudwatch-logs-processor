@@ -1,23 +1,44 @@
 AWSTemplateFormatVersion: '2010-09-09'
 Transform: 'AWS::Serverless-2016-10-31'
 Description: >
-  An Amazon Kinesis Firehose stream processor that extracts individual log events from records sent by Cloudwatch Logs subscription filters.
+  An Amazon Kinesis Firehose stream processor that extracts individual log
+  events from records sent by Cloudwatch Logs subscription filters.
 
-  Last Modified: 8 Nov, 2017
-  Authors:  Tarik Makota <tmak@amazon.com>, Kevin Deng <chaodeng@amazon.com>
-
+  Last Modified: 14 May, 2018
+  Authors:  Rutvik Hora <rutvih@amazon.com>
 Outputs:
   FirehoseKinesisInlineProcessor:
     Description: "Lambda Function ARN that can be used to configure a Firehose Delivery Stream with inline processing."
-    Value: !GetAtt KinesisFirehoseCloudwatchLogsProcessor.Arn
-
+    Value: !GetAtt kinesisfirehosecloudwatchlogsprocessor.Arn
+      
 Resources:
-  KinesisFirehoseCloudwatchLogsProcessor:
+  kinesisfirehosecloudwatchlogsprocessor:
     Type: 'AWS::Serverless::Function'
     Properties:
       Handler: index.handler
       Runtime: nodejs6.10
-      CodeUri: ./amazon-kinesis-firehose-cloudwatch-logs-processor.zip
-      Description: An Amazon Kinesis Firehose stream processor that converts input records from VPC Flow Logs to raw ingestable format
-      MemorySize: 256
+      CodeUri: .
+      Description: >
+        An Amazon Kinesis Firehose stream processor that extracts individual log 
+        events from records sent by Cloudwatch Logs subscription filters.
+      MemorySize: 1024
       Timeout: 60
+      Policies:
+      - Statement:
+        - Action:
+          - logs:CreateLogGroup
+          - logs:CreateLogStream
+          - logs:PutLogEvents
+          Resource:
+            !Sub 'arn:aws:logs:${AWS::Region}:${AWS::AccountId}:log-group:*'
+          Effect: Allow
+        - Action:
+          - firehose:PutRecordBatch
+          Resource:
+            !Sub 'arn:aws:firehose:${AWS::Region}:${AWS::AccountId}:deliverystream/*'
+          Effect: Allow
+        - Action:
+          - kinesis:PutRecords
+          Resource:
+            !Sub 'arn:aws:kinesis:${AWS::Region}:${AWS::AccountId}:stream/*'
+          Effect: Allow
