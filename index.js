@@ -135,7 +135,7 @@ exports.handler = (event, context, callback) => {
 
         let projectedSize = recs.filter(rec => rec.result !== 'ProcessingFailed')
                               .map(r => r.recordId.length + r.data.length)
-                              .reduce((a, b) => a + b);
+                              .reduce((a, b) => a + b, 0);
         // 4000000 instead of 6291456 to leave ample headroom for the stuff we didn't account for
         for (let idx = 0; idx < event.records.length && projectedSize > 4000000; idx += 1) {
             const rec = result.records[idx];
